@@ -1,0 +1,43 @@
+﻿@page "/checkout/{ProductID}/{Quantity}"
+
+@using DataLibrary
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.LoginState loginState
+@inject NavigationManager NavManager
+
+
+
+@if (loginState.IsLoggedIn)
+{
+    <Order ProductQuantity="@Quantity" pID="@ProductID" />
+}
+else
+{
+
+
+    NavManager.NavigateTo("/login");
+}
+
+
+@code{
+
+    [Parameter]
+    public string ProductID { get; set; }
+
+    [Parameter]
+    public string Quantity { get; set; }
+
+    List<ProductModel> ProductList;
+    ProductModel product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql1 = "select * from produits where id='" + ProductID + "'";
+        ProductList = await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+        product = ProductList[0];
+    }
+
+}

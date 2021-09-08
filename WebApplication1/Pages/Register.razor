@@ -1,0 +1,97 @@
+﻿@page "/register"
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.LoginState loginState
+@inject NavigationManager NavManager
+
+@if (loginState.IsLoggedIn)
+{
+    <form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <div class="alert alert-primary" role="alert">
+            Déjà connecté  <a href="profile"> @loginState.Name </a>
+        </div>
+        <a href="/" class="btn btn-success"> Acceuil </a>
+    </form>   
+}
+else
+{
+    <form style="width: 500px; margin-left: auto; margin-right: auto;">
+        <h2 style="text-align: center;">Inscription</h2>
+        <div class="mb-3">
+            <label for="name" class="form-label">Nom complet</label>
+            <input @bind="Name" type="text" class="form-control" id="exampleInputName1">
+
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Adresse email</label>
+            <input @bind="Email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div id="emailHelp" class="form-text">Votre adresse ne va pas etre partagé.</div>
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Mot de passe</label>
+            <input @bind="Password" type="password" class="form-control" id="exampleInputPassword1">
+        </div>
+        <button @onclick="InsertData" class="btn btn-primary">S'inscrire</button>
+        <br />
+        <p style="margin-top:10%; text-align: center;">Déjà inscrit? <a href="login" class="btn btn-secondary">Connecter</a></p>
+        <br />
+        @if (Result.Length > 0)
+        {
+            <br />
+            <div class="alert alert-primary" role="alert">
+                @Result
+            </div>
+        }
+    </form>
+}
+
+@code
+{
+
+    private string Name { get; set; }
+
+    private string Email { get; set; }
+
+    private string Password { get; set; }
+
+    private string Result = "";
+
+
+
+    List<UserModel> UserModel;
+
+    private async Task InsertData()
+    {
+        string sql1 = "select * from users where email='" + Email + "';";
+
+        UserModel = await _data.LoadData<UserModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+
+        if (UserModel != null & (Name != null) & (Email != null) & (Password != null))
+        {
+            if (UserModel.Count == 0)
+            {
+                string sql2 = "insert into users(name, email, password) values (@name, @email, @password);";
+                await _data.SaveData(sql2, new { name = Name, email = Email, password = Password }, _config.GetConnectionString("default"));
+                Result = "Successfully Registred! ";
+                System.Threading.Thread.Sleep(3000);
+                NavManager.NavigateTo("/login");
+            }
+            else
+            {
+                Result = "Email déjà utilisé!";
+            }
+        }
+        else
+        {
+            Result = "Erreur!";
+        }
+    }
+
+
+
+
+}

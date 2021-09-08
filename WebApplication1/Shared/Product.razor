@@ -1,0 +1,195 @@
+﻿@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.LoginState loginState
+
+<style>
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 15px;
+        display: flex;
+    }
+
+    .left-column {
+        width: 65%;
+        position: relative;
+    }
+
+    .right-column {
+        width: 35%;
+        margin-top: 60px;
+    }
+
+    /* Left Column */
+
+    .left-column img {
+        object-fit: cover;
+        width: 600px;
+        height: 400px;
+        display: block;
+        position: absolute;
+        left: 5%;
+        top: 10%;
+        opacity: 1;
+        transition: all 0.3s ease;
+    }
+
+        .left-column img.active {
+            opacity: 1;
+        }
+
+    /* Product Description */
+
+    .product-description {
+        border-bottom: 1px solid #E1E8EE;
+        margin-bottom: 20px;
+    }
+
+        .product-description span {
+            font-size: 12px;
+            color: #358ED7;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+        }
+
+        .product-description h1 {
+            font-weight: 300;
+            font-size: 52px;
+            color: #43484D;
+            letter-spacing: -2px;
+        }
+
+        .product-description p {
+            font-size: 16px;
+            font-weight: 300;
+            color: #86939E;
+            line-height: 24px;
+        }
+
+    /* Product Price */
+
+    .product-price {
+        display: flex;
+        align-items: center;
+    }
+
+        .product-price span {
+            font-size: 26px;
+            font-weight: 300;
+            color: black;
+            margin-right: 20px;
+        }
+
+    .cart-btn {
+        display: inline-block;
+        background-color: #7DC855;
+        border-radius: 6px;
+        font-size: 16px;
+        color: #FFFFFF;
+        text-decoration: none;
+        padding: 12px 30px;
+        transition: all .5s;
+    }
+
+        .cart-btn:hover {
+            background-color: #64af3d;
+        }
+</style>
+
+<main class="container">
+
+    <!-- Left Column /  Image -->
+    <div class="left-column">
+        <img src="/images/@Image" alt="">
+    </div>
+
+
+    <!-- Right Column -->
+    <div class="right-column">
+
+        <!-- Product Description -->
+        <div class="product-description">
+            <span>@category</span>
+            <h3>@title</h3>
+            <p>@description</p>
+        </div>
+
+        <!-- Product Configuration -->
+        <div class="product-configuration" style="display: inline-block;">
+            <span>Quantite : </span> <button class="btn secondary-btn" @onclick="DecrementQuantity" style="margin-left: 20px;">-</button>
+            @Quantity <button class="btn secondary-btn" @onclick="IncrementQuantity">+</button>
+            <br>
+        </div>
+
+        <!-- Product Pricing -->
+        <div class="product-price" style="margin-top: 20px;">
+            <span style="color: lightseagreen">DZD @price,00</span>
+        </div>
+        <div style="margin-left: 5px; margin-top: 10px">
+            <a href="/checkout/@ProductID/@Quantity" class="btn btn-outline-primary">Acheter</a>
+            <button @onclick="AjouterAPanier" type="button" class="btn btn-outline-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-plus-fill" viewBox="0 0 16 16">
+                    <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1H.5zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0zM9 5.5V7h1.5a.5.5 0 0 1 0 1H9v1.5a.5.5 0 0 1-1 0V8H6.5a.5.5 0 0 1 0-1H8V5.5a.5.5 0 0 1 1 0z" />
+                </svg>
+            </button>
+            <button @onclick="AjouterAWishlist" type="button" class="btn btn-outline-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</main>
+
+@code{
+    [Parameter]
+    public int ProductID { get; set; }
+    [Parameter]
+    public string category { get; set; }
+    [Parameter]
+    public string title { get; set; }
+    [Parameter]
+    public string description { get; set; }
+    [Parameter]
+    public int price { get; set; }
+    [Parameter]
+    public string Image { get; set; }
+
+    private int Quantity = 1;
+
+    private void IncrementQuantity()
+    {
+        Quantity++;
+        price = (price / (Quantity - 1)) * Quantity;
+    }
+
+    private void DecrementQuantity()
+    {
+        Quantity--;
+        if (Quantity < 1)
+        {
+            Quantity = 1;
+        }
+        else
+        {
+            price = (price / (Quantity + 1)) * Quantity;
+        }
+
+    }
+
+    async Task AjouterAWishlist()
+    {
+        string sql = "insert into wishlist(user_id, product_id) values (@user_id, @product_id);";
+        await _data.SaveData(sql, new { user_id = loginState.ID, product_id = ProductID }, _config.GetConnectionString("default"));
+    }
+    async Task AjouterAPanier()
+    {
+        string sql = "insert into panier(user_id, product_id) values (@user_id, @product_id);";
+        await _data.SaveData(sql, new { user_id = loginState.ID, product_id = ProductID }, _config.GetConnectionString("default"));
+    }
+
+}

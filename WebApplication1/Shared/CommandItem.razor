@@ -1,0 +1,43 @@
+﻿@inject NavigationManager NavManager
+<br />
+<div style="background: white; width: 100%; padding: 30px; border: 1px solid #eaeaea; border-radius: 10px; box-shadow: 1px 3px 20px rgb(0 0 0 / 10%); display: flex; align-items: center; justify-content: space-between; flex-direction: row-reverse;">
+    <a href="/produit/@ProductID">
+        <img style="margin: 0 2em; width: 110px;" src="images/@image" />
+    </a>
+    <div style="position: relative">
+        <h1 @onclick="ClickNav" style="cursor: pointer;font-size: 18px; font-weight: bold;">@name</h1>
+        <p @onclick="ClickNav" style="cursor: pointer;color: #999; font-size: 16px">@address</p>
+        <!-- Actions -->
+        <div>
+            <h4 @onclick="ClickNav" style="display: block;line-height: 0; font-size: 16px;">Qte: @quantity</h4><br />
+            <h4 @onclick="ClickNav" style="display: block; line-height: 0; font-size: 16px;">Commandé le: @date</h4><br />
+            <h4 @onclick="ClickNav" style="display: block; line-height: 0; font-size: 24px; font-weight: bold; color: lightseagreen; margin-top:10px;">Total: DZD @(quantity * price)</h4>
+            <div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string image { get; set; }
+    [Parameter]
+    public string name { get; set; }
+    [Parameter]
+    public int ProductID { get; set; }
+    [Parameter]
+    public string address { get; set; }
+    [Parameter]
+    public int price { get; set; }
+    [Parameter]
+    public int quantity { get; set; }
+    [Parameter]
+    public string date { get; set; }
+
+    void ClickNav()
+    {
+        NavManager.NavigateTo("/produit/" + @ProductID);
+    }
+
+}

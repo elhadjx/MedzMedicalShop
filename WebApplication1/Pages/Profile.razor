@@ -1,0 +1,35 @@
+﻿@page "/profile"
+@inject Data.LoginState loginState
+@inject NavigationManager NavManager
+
+@if (loginState.IsLoggedIn)
+{
+    <form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <p>Email: @loginState.Email</p>
+        <br />
+        <p>Nom: @loginState.Name</p>
+        <br />
+        <button @onclick="ProcedLogOut" class="btn btn-primary"> Se Déconnecter</button>
+        <br />
+        <a style="margin-top:5%;" href="/" class="btn btn-success"> Accueil </a>
+    </form>
+}
+else
+{
+    <div class="alert alert-primary" role="alert">
+        Voulez vous connectez!  
+        <a href="register" class="btn btn-secondary">Inscription</a>
+        <a href="login" class="btn btn-primary">Connexion</a>
+    </div>
+}
+
+@code
+{
+    private void ProcedLogOut()
+    {
+        loginState.LogOut();
+        System.Threading.Thread.Sleep(50);
+        NavManager.NavigateTo("/");
+
+    }
+}

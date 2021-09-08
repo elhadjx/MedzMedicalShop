@@ -1,0 +1,43 @@
+﻿@page "/produit/{ProductID}"
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+
+
+@if (productModel == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    foreach (var p in productModel)
+    {
+        <p>
+            <Product ProductID=@p.Id
+                     Image=@p.Image
+                     category=@p.Category
+                     title=@p.Name
+                     description=@p.Description
+                     price=@p.Price />
+        </p>
+    }
+}
+
+@code{
+
+    [Parameter] 
+    public string ProductID { get; set; }
+
+    List<ProductModel> productModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from produits where id=" + ProductID.ToString();
+
+        productModel = await _data.LoadData<ProductModel, dynamic>(sql, new { }, _config.GetConnectionString("default"));
+    }
+
+}

@@ -1,0 +1,17 @@
+﻿
+@inject NavigationManager NavManager
+
+<input @bind="@TextToSearch" @onkeyup="@ProcedSearch" style="padding: 20px; width: 70%; border: 1px solid #DDD;" type="text" class="form-control" id="exampleInputEmail1" placeholder="Recherche...">
+
+@code {
+
+    string TextToSearch;
+
+    private void ProcedSearch(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            NavManager.NavigateTo("/search/" + TextToSearch );
+        }
+    }
+}

@@ -1,0 +1,172 @@
+﻿@page "/gyne"
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.SearchFilter sf;
+
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="form-check form-check-inline">
+        <label class="form-check-label">Filtrer: </label>
+    </div>
+    <div class="form-check form-check-inline">
+        @if (sf.isCardio)
+        {
+            <input @onchange="ChangeCardio" class="form-check-input" type="checkbox" checked id="inlineCheckbox1" value="cardiologie">
+        }
+        else
+        {
+            <input @onchange="ChangeCardio" class="form-check-input" type="checkbox" id="inlineCheckbox1" value="cardiologie">
+        }
+
+        <label class="form-check-label" for="inlineCheckbox1">Cardiologie</label>
+    </div>
+    <div class="form-check form-check-inline">
+        @if (sf.isDentaire)
+        {
+            <input @onchange="ChangeDentaire" class="form-check-input" type="checkbox" checked id="inlineCheckbox2" value="dentaire">
+        }
+        else
+        {
+            <input @onchange="ChangeDentaire" class="form-check-input" type="checkbox" id="inlineCheckbox2" value="dentaire">
+        }
+
+        <label class="form-check-label" for="inlineCheckbox2">Dentaire</label>
+    </div>
+    <div class="form-check form-check-inline">
+        @if (sf.isGyne)
+        {
+            <input @onchange="ChangeGyne" class="form-check-input" type="checkbox" checked id="inlineCheckbox2" value="gynecologie">
+        }
+        else
+        {
+            <input @onchange="ChangeGyne" class="form-check-input" type="checkbox" id="inlineCheckbox2" value="gynecologie">
+        }
+
+        <label class="form-check-label" for="inlineCheckbox3">Gynécologie</label>
+    </div>
+</nav>
+
+@if (productList != null & productList.Count > 0)
+{
+    int i = 0;
+    @foreach (var p in productList)
+    {
+        if (i++ < 10)
+        {
+            <SearchItem name="@p.Name" price="@p.Price" ProductID="@p.Id" image="@p.Image" description="@p.Description" />
+        }
+    }
+}
+else
+{
+    <form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <p>Search results apears here</p>
+    </form>
+}
+@code {
+
+    [Parameter]
+    public string TextToSearch { get; set; }
+
+    List<ProductModel> productList = null;
+
+
+
+    string categoryToSearch = "";
+
+    string categories = "category LIKE %cardiologie% OR category LIKE %dentaire% OR category LIKE %gynecologie%";
+
+    async Task ChangeCardio()
+    {
+        sf.isCardio = !sf.isCardio;
+        productList.Clear();
+        await ReSearch();
+        StateHasChanged();
+        Console.WriteLine("Cardio: " + sf.isCardio);
+
+    }
+    async Task ChangeDentaire()
+    {
+        sf.isDentaire = !sf.isDentaire;
+        productList.Clear();
+        await ReSearch();
+        StateHasChanged();
+        Console.WriteLine("Dentaire: " + sf.isDentaire);
+    }
+    async Task ChangeGyne()
+    {
+        sf.isGyne = !sf.isGyne;
+        productList.Clear();
+        await ReSearch();
+        StateHasChanged();
+        Console.WriteLine("Gyne: " + sf.isGyne);
+    }
+
+    protected async Task ReSearch()
+    {
+        if (sf.isCardio & sf.isDentaire & sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%cardiologie%' OR category LIKE '%dentaire%' OR category LIKE '%gynecologie%')";
+        }
+        if (!sf.isCardio & sf.isDentaire & sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%dentaire%' OR category LIKE '%gynecologie%')";
+        }
+        if (sf.isCardio & !sf.isDentaire & sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%cardiologie%' OR category LIKE '%gynecologie%')";
+        }
+        if (sf.isCardio & sf.isDentaire & !sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%cardiologie%' OR category LIKE '%dentaire%')";
+        }
+        if (!sf.isCardio & !sf.isDentaire & sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%gynecologie%')";
+        }
+        if (!sf.isCardio & sf.isDentaire & !sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%dentaire%')";
+        }
+        if (sf.isCardio & !sf.isDentaire & !sf.isGyne)
+        {
+            categoryToSearch = "AND (category LIKE '%cardiologie%')";
+        }
+        if (!sf.isCardio & !sf.isDentaire & !sf.isGyne)
+        {
+            categoryToSearch = "";
+        }
+
+        Console.WriteLine("Search: " + TextToSearch);
+        string sql1 = "SELECT * FROM produits WHERE (name LIKE '%" + TextToSearch + "%') " + categoryToSearch;
+        Console.WriteLine(sql1);
+        productList = await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+        if (productList == null)
+        {
+            Console.WriteLine("product list null!");
+        }
+        StateHasChanged();
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        Console.WriteLine("Search: " + TextToSearch);
+        string sql1 = "SELECT * FROM produits WHERE category LIKE '%gyne%'";
+        Console.WriteLine(sql1);
+
+        productList = await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+        if (productList == null)
+        {
+            Console.WriteLine("product list null!");
+        }
+        StateHasChanged();
+    }
+
+}
+

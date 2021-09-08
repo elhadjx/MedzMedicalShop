@@ -1,0 +1,110 @@
+﻿@page "/"
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+
+<div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img style="object-fit: cover; width:14rem; height:300px;" class="d-block w-100" src="images/slide1.jpg" alt="First slide">
+        </div>
+        <div class="carousel-item">
+            <img style="object-fit: cover; width:14rem; height:300px;" class="d-block w-100" src="images/slide2.jpg" alt="First slide">
+        </div>
+        <div class="carousel-item">
+            <img style="object-fit: cover; width:14rem; height:300px;" class="d-block w-100" src="images/slide3.jpg" alt="First slide">
+        </div>
+    </div>
+</div>
+<div class="container">
+    <h2 class="text-divider"><span>Produits Populaires</span></h2>
+    <div class="row mt-3">
+        @if (CategoryOneProductModel == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            int i = 0;
+            @foreach (var p in CategoryOneProductModel)
+            {
+                @if (++i <= 4)
+                {
+                    <div class="col">
+                        <Item ProductID=@p.Id Title=@p.Name Price=@p.Price Image=@p.Image />
+                    </div>
+                }
+
+            }
+        }
+    </div>
+    <div class="row mt-3">
+        @if (CategoryTwoProductModel == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            int i = 0;
+            @foreach (var p in CategoryTwoProductModel)
+            {
+                if (++i <= 4)
+                {
+                    <div class="col">
+                        <Item ProductID=@p.Id Title=@p.Name Price=@p.Price Image=@p.Image />
+                    </div>
+                }
+
+            }
+        }
+    </div>
+    <div class="row mt-3">
+        @if (CategoryThreeProductModel == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            int i = 0;
+            @foreach (var p in CategoryThreeProductModel)
+            {
+                if (++i <= 4)
+                {
+                    <div class="col">
+                        <Item ProductID=@p.Id Title=@p.Name Price=@p.Price Image=@p.Image />
+                    </div>
+                }
+
+            }
+        }
+    </div>
+</div>
+@code{
+
+
+    List<ProductModel> CategoryOneProductModel;
+
+    List<ProductModel> CategoryTwoProductModel;
+
+    List<ProductModel> CategoryThreeProductModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql1 = "select * from produits where category='cardiologie'";
+
+        string sql2 = "select * from produits where category='dentaire'";
+
+        string sql3 = "select * from produits where category='gynecologie'";
+
+
+        CategoryOneProductModel = await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+
+        CategoryTwoProductModel = await _data.LoadData<ProductModel, dynamic>(sql2, new { }, _config.GetConnectionString("default"));
+
+        CategoryThreeProductModel = await _data.LoadData<ProductModel, dynamic>(sql3, new { }, _config.GetConnectionString("default"));
+
+    }
+
+}

@@ -1,0 +1,43 @@
+﻿@page "/wishlist"
+
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.LoginState loginState
+
+
+@if (productList != null & productList.Count > 0)
+{
+    int i = 0;
+    @foreach (var p in productList)
+    {
+        if (i++ < 10)
+        {
+            <SearchItem name="@p.Name" price="@p.Price" ProductID="@p.Id" image="@p.Image" description="@p.Description" />
+        }
+    }
+}
+else
+{
+    <form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <p>Pas de produits!</p>
+    </form>
+}
+@code {
+
+        List<ProductModel> productList = null;
+
+        protected override async Task OnInitializedAsync()
+        {
+            string sql1 = "SELECT produits.*,wishlist.user_id,wishlist.product_id FROM produits, wishlist WHERE (wishlist.product_id = produits.id) AND (wishlist.user_id = " + loginState.ID + ")";
+            Console.WriteLine(sql1);
+
+            productList = await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+
+            StateHasChanged();
+        }
+
+}

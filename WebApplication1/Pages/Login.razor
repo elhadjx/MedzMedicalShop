@@ -1,0 +1,89 @@
+﻿@page "/login"
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Data.LoginState loginState
+@inject NavigationManager NavManager
+
+
+@if (loginState.IsLoggedIn)
+{
+<form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+    <div class="alert alert-primary" role="alert">
+        Connecté <a href="profile">@loginState.Name</a>
+        <br />
+    </div>
+    <a href="/" class="btn btn-success">Accueil</a>
+</form>
+    
+}
+else
+{
+    <form style="width: 500px; margin-left: auto; margin-right: auto;">
+        <h1 style="text-align: center;">Connexion</h1>
+        <div class="mb-3">
+            <label for="exampleInputEmail1" class="form-label">Adresse Email</label>
+            <input @bind="Email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
+            <div id="emailHelp" class="form-text">Votre email ne va jamais etre partagé.</div>
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Mot de passe</label>
+            <input @bind="Password" type="password" class="form-control" id="exampleInputPassword1">
+        </div>
+        <button type="submit" @onclick="ProcedLogin" class="btn btn-primary">Se Connecter</button>
+        <br />
+        <p style="margin-top:10%; text-align: center;">Déjà inscrit? <a href="register" class="btn btn-secondary">Inscription</a></p>
+        @if (Result != null)
+        {
+            
+            Console.WriteLine("alert : " + Result);
+            <br />
+            <div class="alert alert-primary" role="alert">
+                @Result
+            </div>
+        }
+    </form>
+}
+
+
+@code
+{
+    private string Email { get; set; }
+    private string Password { get; set; }
+    private string Result { get; set; }
+
+    List<UserModel> UserModel;
+
+    UserModel LoggedUser;
+
+    private async Task ProcedLogin()
+    {
+        string sql1 = "select * from users where email='" + Email + "' and password='" + Password + "';";
+        Console.WriteLine(sql1);
+
+        UserModel = await _data.LoadData<UserModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+        if (UserModel != null)
+        {
+            if (UserModel.Count > 0)
+            {
+                LoggedUser = UserModel[0];
+                loginState.SetLogin(LoggedUser);
+                Result = "Bienvenue " + LoggedUser.Name + "!";
+                Console.WriteLine("Counted well: " + Result);
+                NavManager.NavigateTo("profile");
+            }
+            else
+            {
+                Result = "Erreur";
+            }
+        }
+        else
+        {
+            Result = "Erreur";
+        }
+    }
+}

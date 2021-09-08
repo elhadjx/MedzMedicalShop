@@ -1,0 +1,260 @@
+﻿
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Data.LoginState loginState
+@inject NavigationManager NavManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 order-md-2 mb-4">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-muted">Votre panier</span>
+                <span class="badge badge-secondary badge-pill">@Quantity</span>
+            </h4>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-condensed">
+                    <div>
+                        <h6 class="my-0">@productModel.Name</h6>
+                        <small class="text-muted">@productModel.Category</small>
+                    </div>
+                    <span class="text-muted">DZD @ProductPrice</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total (Dinars)</span>
+                    <strong>DZD @(Quantity * ProductPrice)</strong>
+                </li>
+            </ul>
+        </div>
+        <div class="col-md-8 order-md-1">
+            <h4 class="mb-3">Adresse de livraison</h4>
+            <form class="needs-validation" novalidate>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName">Prénom</label>
+                        <input @bind="input_fName" type="text" class="form-control" id="firstName" required>
+                        <div class="invalid-feedback">
+                           Champ obligatoire*
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName">Nom</label>
+                        <input @bind="input_lName" type="text" class="form-control" id="lastName" required>
+                        <div class="invalid-feedback">
+                           Champ obligatoire*
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="address">Address</label>
+                    <input @bind="input_address" type="text" class="form-control" id="address" placeholder="1234 Main St" required>
+                    <div class="invalid-feedback">
+                        Entrez votre adresse de livraison
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="country">Pays</label>
+                        <select @bind="input_country" class="custom-select d-block w-100" id="country" required>
+                            <option value="algerie">Algerie</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Selectionnez votre pays!
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="state">Wilaya</label>
+                        <select @bind="input_wilaya" class="custom-select d-block w-100" id="state" required>
+                            <option selected>Adrar</option>
+                            <option>Chlef</option>
+                            <option>Lagouat</option>
+                            <option>Oum El Bouaghi</option>
+                            <option>Batna</option>
+                            <option>Bejaia</option>
+                            <option>Biskra</option>
+                            <option>Bechar</option>
+                            <option>Blida</option>
+                            <option>Bouira</option>
+                            <option>Tamanrasset</option>
+                            <option>Tebessa</option>
+                            <option>Tlemcen</option>
+                            <option>Tiaret</option>
+                            <option>Tizi Ouzou</option>
+                            <option>Alger</option>
+                            <option>Djelfa</option>
+                            <option>Jijel</option>
+                            <option>Setif</option>
+                            <option>Saida</option>
+                            <option>Skikda</option>
+                            <option>Sidi Bel Abbes</option>
+                            <option>Annaba</option>
+                            <option>Guelma</option>
+                            <option>Constantine</option>
+                            <option>Medea</option>
+                            <option>Mostaganem</option>
+                            <option>Msila</option>
+                            <option>Mascara</option>
+                            <option>Ouargla</option>
+                            <option>Oran</option>
+                            <option>El Bayadh</option>
+                            <option>Illizi</option>
+                            <option>Bord Bou Arreridj</option>
+                            <option>Boumerdes</option>
+                            <option>El Tarf</option>
+                            <option>Tindouf</option>
+                            <option>Tissemsilt</option>
+                            <option>El Oued</option>
+                            <option>Khenchela</option>
+                            <option>Souk Ahras</option>
+                            <option>Tipaza</option>
+                            <option>Mila</option>
+                            <option>Ain Defla</option>
+                            <option>Naama</option>
+                            <option>Ain Temouchent</option>
+                            <option>Ghardaia</option>
+                            <option>Relizane</option>
+                            <option>El Mghair</option>
+                            <option>El Menia</option>
+                            <option>Ouled Djellal</option>
+                            <option>Bordj Baji Mokhtar</option>
+                            <option>Beni Abbes</option>
+                            <option>Timimoun</option>
+                            <option>Touggourt</option>
+                            <option>Djanet</option>
+                            <option>In Salah</option>
+                            <option>In Guezzam</option>
+                        </select>
+                        <div class="invalid-feedback">
+                            Selectionnez votre Wilaya!
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="zip">Zip</label>
+                        <input @bind="input_zip" type="text" class="form-control" id="zip" placeholder="" required>
+                        <div class="invalid-feedback">
+                            Code zip obligatoire*
+                        </div>
+                    </div>
+                </div>
+                <hr class="mb-4">
+
+                <hr class="mb-4">
+
+                <h4 class="mb-3">Payement</h4>
+
+                <div class="d-block my-3">
+                    <div class="custom-control custom-radio">
+                        <input id="eddahabia" name="paymentMethod" type="radio" class="custom-control-input" checked required>
+                        <label class="custom-control-label" for="eddahabia">Eddahabia</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input id="cib" name="paymentMethod" type="radio" class="custom-control-input" required>
+                        <label class="custom-control-label" for="cib">CIB</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input id="visa" name="paymentMethod" type="radio" class="custom-control-input" required>
+                        <label class="custom-control-label" for="visa">Visa</label>
+                    </div>
+                    <div class="custom-control custom-radio">
+                        <input id="pal" name="paymentMethod" type="radio" class="custom-control-input" required>
+                        <label class="custom-control-label" for="pal">Payement à la livraison</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="cc-name">Nom sur la carte</label>
+                        <input @bind="input_ccname" type="text" class="form-control" id="cc-name" placeholder="" required>
+                        <small class="text-muted">Nom complet sur la carte</small>
+                        <div class="invalid-feedback">
+                            Le nom sur la carte est obligatoire
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="cc-number">Le numéro de la carte</label>
+                        <input @bind="input_ccnumber" type="text" class="form-control" id="cc-number" placeholder="" required>
+                        <div class="invalid-feedback">
+                            Le numero de carte est obligatoire*
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="cc-expiration">Expiration</label>
+                        <input @bind="input_ccexp" type="text" class="form-control" id="cc-expiration" placeholder="" required>
+                        <div class="invalid-feedback">
+                           La date d'expiration est obligatoire*
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="cc-cvv">CVV</label>
+                        <input @bind="input_cvv" type="text" class="form-control" id="cc-cvv" placeholder="" required>
+                        <div class="invalid-feedback">
+                            Le code de sécurité est obligatoire*
+                        </div>
+                    </div>
+                </div>
+                <hr class="mb-4">
+                <a href="/success" @onclick="InsertOrderToDB" class="btn btn-primary btn-lg btn-block" style="margin-bottom: 15%;">Valider la commande</a>
+            </form>
+        </div>
+    </div>
+</div>
+@code
+{
+    [Parameter]
+    public string pID { get; set; }
+    [Parameter]
+    public string ProductQuantity { get; set; }
+
+    bool PayWithCard = true;
+
+    string input_fName;
+    string input_lName;
+    string input_address;
+    string input_country = "Algeria";
+    string input_wilaya;
+    string input_zip;
+    string input_ccname;
+    string input_ccnumber;
+    string input_ccexp;
+    string input_cvv;
+
+
+    public int ProductPrice { get; set; }
+
+    ProductModel productModel;
+
+
+    int Quantity = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Quantity = Int32.Parse(ProductQuantity);
+        string sql1 = "select * from produits where id=" + pID + ";";
+        Console.WriteLine(sql1);
+
+        productModel = (await _data.LoadData<ProductModel, dynamic>(sql1, new { }, _config.GetConnectionString("default")))[0];
+        if (productModel != null)
+        {
+            ProductPrice = productModel.Price;
+        }
+    }
+
+    private async Task InsertOrderToDB()
+    {
+        string longAddress = input_fName + " " + input_lName + ", " + input_address + ", " + input_zip + ", " + input_wilaya + ", " + input_country;
+
+        string sql1 = "insert into commands(user_id, product_id, quantity, address) values (@user_id, @product_id, @quantity, @address);";
+
+        await _data.SaveData(sql1, new { user_id = loginState.ID, product_id = pID, quantity = Quantity, address = longAddress }, _config.GetConnectionString("default"));
+
+        NavManager.NavigateTo("/success");
+    }
+
+}

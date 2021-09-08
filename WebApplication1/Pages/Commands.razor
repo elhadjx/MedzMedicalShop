@@ -1,0 +1,42 @@
+﻿@page "/commands"
+
+@using DataLibrary;
+@using WebApplication1.Models
+@using Microsoft.Extensions.Configuration
+@inject IDataAccess _data
+@inject IConfiguration _config
+@inject Data.LoginState loginState
+
+
+@if (commandList != null & commandList.Count > 0)
+{
+    int i = 0;
+    @foreach (var c in commandList)
+    {
+        if (i++ < 10)
+        {
+            <CommandItem name="@c.Name" ProductID="@c.Id" image="@c.Image" quantity="@c.Quantity" price="@c.Price" address="@c.Address" date="@c.Date" />
+        }
+    }
+}
+else
+{
+    <form style="text-align: center; width: 500px; margin-left: auto; margin-right: auto;">
+        <p>Pas de Commands!</p>
+    </form>
+}
+@code {
+
+    List<CommandModel> commandList = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql1 = "SELECT produits.*,commands.* FROM produits, commands WHERE (commands.product_id = produits.id) AND (commands.user_id = " + loginState.ID + ")";
+        Console.WriteLine(sql1);
+
+        commandList = await _data.LoadData<CommandModel, dynamic>(sql1, new { }, _config.GetConnectionString("default"));
+
+        StateHasChanged();
+    }
+
+}
